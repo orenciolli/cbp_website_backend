@@ -4,6 +4,10 @@ import website_util as ut
 import json
 
 
+'''
+Makes the JSON string containing the total number of each county's workers
+employed in a specific sector
+'''
 def make_dict(year, df, sector):
     sect_df = ut.select_sector(df, sector)[['ctyname', 'Employment']]
     sect_df['ctyname'] = sect_df['ctyname'].str.replace(' County', '')
@@ -17,13 +21,34 @@ def make_dict(year, df, sector):
     pivoted = sect_df.pivot_table(index = 'ctyname', values = empl_str)
     return pivoted.to_json()
 
+'''
+Makes the JSON string containing the percentage of each county's workers
+employed in a specific sector
+'''
+def make_dict_percent(year, df, sector):
+    sect_df = select_sector(df, sector)[['ctyname','Percent']]
+    sect_df['ctyname'] = sect_df['ctyname'].str.replace(' County', '')
+    
+    empl_str = f'{year} {sector} percentage'
+    
+    sect_df.rename({'Percent': empl_str},
+                   axis = 1, inplace = True)
+    
+    
+    pivoted = sect_df.pivot_table(index = 'ctyname', values = empl_str)
+    return pivoted.to_json()
 
+'''
+Writes the strings passed in to the given filepath
+'''
 def write_json(fp, strings):
     
     #could also do this validation when creating the strings
     with open(fp, 'w') as f:
+        f.write('[')
         if len(strings) == 1:
             f.write(strings[0])
+            f.write(']') 
             return
         
         for i, string in enumerate(strings):
@@ -36,8 +61,12 @@ def write_json(fp, strings):
                 continue
             else:
                 f.write(string[1:-1])
-                f.write(',') 
+                f.write(',')
+        f.write(']') 
 
+'''
+Makes the JSON strings containing full sector employment data for all years passed in
+'''
 def make_strings(years):
     out = []
     for year in years:
@@ -45,6 +74,21 @@ def make_strings(years):
 
         for sector in df['Sector'].unique():
             string = make_dict(year, df, sector)
+            if string == '{}':
+                continue
+            out.append(string)
+    return out
+
+'''
+Makes the JSON strings containing full sector percentage data for all years passed in
+'''
+def make_strings_percent(years):
+    out = []
+    for year in years:
+        df = pd.read_csv(f'data/cbp_{year}.csv')
+
+        for sector in df['Sector'].unique():
+            string = make_dict_percent(year, df, sector)
             if string == '{}':
                 continue
             out.append(string)
@@ -85,13 +129,17 @@ def make_top_10_strings(years):
         out.append(string)
     return out
 
-
+'''
+Writes the list of top 10 JSON strings to the provided filepath
+'''
 def write_top_10_json(fp, strings):
     
     #could also do this validation when creating the strings
     with open(fp, 'w') as f:
+        f.write('[')
         if len(strings) == 1:
             f.write(strings[0])
+            f.write(']')
             return
         
         for i, string in enumerate(strings):
@@ -104,7 +152,8 @@ def write_top_10_json(fp, strings):
                 continue
             else:
                 f.write(string[1:-1])
-                f.write(',') 
+                f.write(',')
+        f.write(']')
 
 
 '''

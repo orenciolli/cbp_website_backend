@@ -26,13 +26,15 @@ def make_readable(empl, geo_ref, naics_ref):
     
     
     ak_mask = (readable['State'] == 'AK')
-    #readable.loc[ak_mask, 'ctyname'] = name_only(readable['ctyname'])
     
     readable.loc[ak_mask, 'ctyname'] = readable[ak_mask]['ctyname'].apply(name_only)
+    readable['ctyname'] = readable['ctyname'].str.replace('County ', '')
     
     return readable.rename({'DESCRIPTION': 'Sector'}, axis = 1)[['County', 'State', 'ctyname', 'Sector', 'Employment']]
     
-    
+'''
+Helper function to handle irregular names in Alaska's data.
+'''
 def name_only(string):
     bor = string.replace(' Borough', '')
     mu = bor.replace(' Municipality', '')
@@ -89,7 +91,7 @@ def get_top_10(df, county):
     highest = []
     i = 0
     while len(highest) < 10 and i < len(sorted_empl):
-        if sorted_empl.index[i] == 'Total for all sectors':
+        if sorted_empl.index[i] == 'Total for all sectors' or sorted_empl.index[i].isna():
             i += 1
             continue
         elif f'{sorted_empl.index[i]}: {sorted_empl.values[i]}' in highest:
@@ -130,4 +132,17 @@ def find_bin(val, percs):
         out += 1
         i += 1
     return out
-    
+
+'''
+Computes the percentage column for each sector, county pair
+'''
+def make_percent(df):
+    total = df[df['Sector'] == 'Total for all sectors']['Employment'].iloc[0]
+    df['Percent'] = df['Employment'] / total
+    return df
+
+'''
+Returns a copy of the dataframe with the the percent column included
+'''
+def add_percent(df):
+    return df.groupby('ctyname').apply(make_percent)
