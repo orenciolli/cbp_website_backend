@@ -70,6 +70,8 @@ def make_strings(years):
         df = pd.read_csv(f'data/cbp_{year}.csv')
 
         for sector in df['Sector'].unique():
+            if sector.isna():
+                continue
             string = make_dict(year, df, sector)
             if string == '{}':
                 continue
@@ -109,6 +111,8 @@ def top_10_json(year):
     out = {}
 
     for county in df['ctyname'].unique():
+        if county.isna():
+            continue
         top_10_dict(df, year, out, county)
 
     return json.dumps(out)
