@@ -5,24 +5,21 @@ import json
 
 
 '''
-Makes the JSON string containing the total number of each county's workers
+Makes the JSON string containing the total number and the percentage of each county's workers
 employed in a specific sector
 '''
 def make_dict(year, df, sector):
-    sect_df = ut.select_sector(df, sector)[['ctyname', 'Employment']]
+    sect_df = select_sector(df, sector)[['ctyname','Employment', 'Percent']]
     sect_df['ctyname'] = sect_df['ctyname'].str.replace(' County', '')
     
     empl_str = f'{year} {sector}'
+    sect_df[empl_str] =  sect_df.apply(lambda row: str([row['Employment'], row['Percent']]), axis = 1)
     
-    sect_df.rename({'Employment': empl_str},
-                   axis = 1, inplace = True)
-    
-    
-    pivoted = sect_df.pivot_table(index = 'ctyname', values = empl_str)
+    pivoted = sect_df.pivot_table(index = 'ctyname', values = empl_str, aggfunc = max)
     return pivoted.to_json()
 
 '''
-Makes the JSON string containing the percentage of each county's workers
+Makes the JSON string containing only the percentage of each county's workers
 employed in a specific sector
 '''
 def make_dict_percent(year, df, sector):

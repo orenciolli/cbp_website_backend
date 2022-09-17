@@ -138,7 +138,7 @@ Computes the percentage column for each sector, county pair
 '''
 def make_percent(df):
     total = df[df['Sector'] == 'Total for all sectors']['Employment'].iloc[0]
-    df['Percent'] = df['Employment'] / total
+    df['Percent'] = (df['Employment'] / total) * 100
     return df
 
 '''
