@@ -21,8 +21,8 @@ naics_ref_1987 = pd.read_csv('reference_files/naics_1987.txt', delimiter = '    
 naics_ref_1986 = pd.read_csv('reference_files/naics_1986.txt', delimiter = '    ')
 
 def save_readable(year):
-    df = pd.read_csv(f'data/efsy_cbp_{year}.csv')
-    
+    fp = f'data/efsy_cbp_{year}.csv'
+    df = pd.read_csv(fp)
     if year >= 2012:
         naics_ref = naics_ref_2012_2016
     elif 2008 <= year < 2012:
@@ -57,6 +57,7 @@ def save_readable(year):
         geo_ref = geo_ref_1986
     else: print('year not currently supported for geo')
     
+    print(fp)
     
     read = ut.make_readable(df,
                  geo_ref, naics_ref)
@@ -66,6 +67,7 @@ def save_readable(year):
         )
 
 years = [i for i in range(1986, 2017)]
+
 for year in years:
     try:
         save_readable(year)

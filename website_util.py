@@ -91,7 +91,7 @@ def get_top_10(df, county):
     highest = []
     i = 0
     while len(highest) < 10 and i < len(sorted_empl):
-        if sorted_empl.index[i] == 'Total for all sectors' or sorted_empl.index[i].isna():
+        if sorted_empl.index[i] == 'Total for all sectors':
             i += 1
             continue
         elif f'{sorted_empl.index[i]}: {sorted_empl.values[i]}' in highest:
@@ -137,8 +137,12 @@ def find_bin(val, percs):
 Computes the percentage column for each sector, county pair
 '''
 def make_percent(df):
-    total = df[df['Sector'] == 'Total for all sectors']['Employment'].iloc[0]
-    df['Percent'] = (df['Employment'] / total) * 100
+    try:
+        total = df[df['Sector'] == 'Total for all sectors']['Employment'].iloc[0]
+        df['Percent'] = (df['Employment'] / total) * 100
+    except:
+        df['Percent'] = 0
+
     return df
 
 '''

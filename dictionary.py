@@ -9,7 +9,7 @@ Makes the JSON string containing the total number and the percentage of each cou
 employed in a specific sector
 '''
 def make_dict(year, df, sector):
-    sect_df = select_sector(df, sector)[['ctyname','Employment', 'Percent']]
+    sect_df = ut.select_sector(df, sector)[['ctyname','Employment', 'Percent']]
     sect_df['ctyname'] = sect_df['ctyname'].str.replace(' County', '')
     
     empl_str = f'{year} {sector}'
@@ -23,7 +23,7 @@ Makes the JSON string containing only the percentage of each county's workers
 employed in a specific sector
 '''
 def make_dict_percent(year, df, sector):
-    sect_df = select_sector(df, sector)[['ctyname','Percent']]
+    sect_df = ut.select_sector(df, sector)[['ctyname','Percent']]
     sect_df['ctyname'] = sect_df['ctyname'].str.replace(' County', '')
     
     empl_str = f'{year} {sector} percentage'
@@ -67,11 +67,9 @@ Makes the JSON strings containing full sector employment data for all years pass
 def make_strings(years):
     out = []
     for year in years:
-        df = pd.read_csv(f'data/cbp_{year}.csv')
+        df = pd.read_csv(f'readable/cbp_{year}.csv')
 
-        for sector in df['Sector'].unique():
-            if sector.isna():
-                continue
+        for sector in df['Sector'].dropna().unique():
             string = make_dict(year, df, sector)
             if string == '{}':
                 continue
@@ -84,9 +82,9 @@ Makes the JSON strings containing full sector percentage data for all years pass
 def make_strings_percent(years):
     out = []
     for year in years:
-        df = pd.read_csv(f'data/cbp_{year}.csv')
+        df = pd.read_csv(f'readable/cbp_{year}.csv')
 
-        for sector in df['Sector'].unique():
+        for sector in df['Sector'].dropna().unique():
             string = make_dict_percent(year, df, sector)
             if string == '{}':
                 continue
@@ -107,12 +105,10 @@ Function which converts the top 10 counties dictionary to a json string
 for the specified year.
 '''
 def top_10_json(year):
-    df = df = pd.read_csv(f'data/cbp_{year}.csv')
+    df = df = pd.read_csv(f'readable/cbp_{year}.csv')
     out = {}
 
-    for county in df['ctyname'].unique():
-        if county.isna():
-            continue
+    for county in df['ctyname'].dropna().unique():
         top_10_dict(df, year, out, county)
 
     return json.dumps(out)
@@ -162,7 +158,7 @@ Function which writes a dictionary of the q quantile values
 for employment in each sector for a given year. (Used for visualization)
 '''
 def quantiles_dictionary(year, dictionary, q):
-    df = df = pd.read_csv(f'data/cbp_{year}.csv')
+    df = df = pd.read_csv(f'readable/cbp_{year}.csv')
     for sector in df['Sector'].unique():
         sect_df = df[df['Sector'] == sector]
         dictionary[f'{year} {sector}'] = ut.find_percentiles(sect_df['Employment'], q)
@@ -185,7 +181,7 @@ Function which writes the q-quantile dictionary to a json file
 for the specified year. (Used for visualization)
 '''
 def quantile_json(year, q):
-    df = df = pd.read_csv(f'data/cbp_{year}.csv')
+    df = df = pd.read_csv(f'readable/cbp_{year}.csv')
     out = {}
 
     quantiles_dictionary(year, df, out, q)
@@ -210,7 +206,7 @@ provided. (used for visualization)
 def make_bin_strings(years):
     out = []
     for year in years:
-        df = pd.read_csv(f'data/cbp_{year}.csv')
+        df = pd.read_csv(f'readable/cbp_{year}.csv')
 
         for sector in df['Sector'].unique():
             string = bins_dictionary(year, sector, df)
