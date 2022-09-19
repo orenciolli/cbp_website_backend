@@ -19,6 +19,7 @@ naics_ref_1998_2002 = pd.read_csv('reference_files/naics_1998_2002.txt', delimit
 naics_ref_1988_1997 = pd.read_csv('reference_files/naics_1988_1997.txt', delimiter = '  ')
 naics_ref_1987 = pd.read_csv('reference_files/naics_1987.txt', delimiter = '    ')
 naics_ref_1986 = pd.read_csv('reference_files/naics_1986.txt', delimiter = '    ')
+naics_ref_1975_1985 = pd.read_csv('reference_files/naics_1975_1985.txt', delimiter = '    ')
 
 def save_readable(year):
     fp = f'data/efsy_cbp_{year}.csv'
@@ -37,6 +38,8 @@ def save_readable(year):
         naics_ref = naics_ref_1987
     elif year == 1986:
         naics_ref = naics_ref_1986
+    elif year < 1986:
+        naics_ref = naics_ref_1975_1985
     else: print('year not currently supported for naics')
         
     if year >= 2012:
@@ -53,7 +56,7 @@ def save_readable(year):
         geo_ref = geo_ref_1988
     elif year == 1987:
         geo_ref = geo_ref_1987
-    elif year == 1986:
+    elif year <= 1986:
         geo_ref = geo_ref_1986
     else: print('year not currently supported for geo')
     
@@ -66,7 +69,8 @@ def save_readable(year):
         f'readable/cbp_{year}.csv', index = False
         )
 
-years = [i for i in range(1986, 2017)]
+#years = [i for i in range(1986, 2017)]
+years = [i for i in range(1976, 1986)]
 
 for year in years:
     try:

@@ -24,10 +24,11 @@ def make_readable(empl, geo_ref, naics_ref):
     #merging naics reference and readable dataframe
     readable = readable.merge(naics_ref, left_on = 'naics', right_on = 'NAICS', how = 'outer') #should this be inner join
     
-    
+    #handling irregular names in Alaska
     ak_mask = (readable['State'] == 'AK')
-    
     readable.loc[ak_mask, 'ctyname'] = readable[ak_mask]['ctyname'].apply(name_only)
+
+    #replacing 'county' with an empty string for JSON formatting
     readable['ctyname'] = readable['ctyname'].str.replace('County ', '')
     
     return readable.rename({'DESCRIPTION': 'Sector'}, axis = 1)[['County', 'State', 'ctyname', 'Sector', 'Employment']]
