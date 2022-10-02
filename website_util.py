@@ -10,33 +10,33 @@ Changes dataframe to readable form (displays county, state, and sector names),
 and displays a single value for employment instead of bounds.
 '''
 def make_readable(empl, geo_ref, naics_ref):
-        empl['Employment'] = empl['lb']
+    empl['Employment'] = empl['lb']
     
     
-        #merging geographic reference and employment data
-        readable = (
-            empl.merge(geo_ref, left_on = ['fipstate', 'fipscty'], 
-                    right_on = ['fipstate', 'fipscty'], how = 'outer')
-        )
-        
-        #merging naics reference and readable dataframe
-        readable = readable.merge(naics_ref, left_on = 'naics', right_on = 'NAICS', how = 'left') #should this be inner join
-        
-        #handling irregular names in Alaska
-        ak_mask = (readable['State'] == 'AK')
-        readable.loc[ak_mask, 'ctyname'] = readable[ak_mask]['ctyname'].apply(name_only)
+    #merging geographic reference and employment data
+    readable = (
+        empl.merge(geo_ref, left_on = ['fipstate', 'fipscty'], 
+                   right_on = ['fipstate', 'fipscty'], how = 'outer')
+    )
+    
+    #merging naics reference and readable dataframe
+    readable = readable.merge(naics_ref, left_on = 'naics', right_on = 'NAICS', how = 'left') #should this be inner join
 
-        #replacing 'county' with an empty string for JSON formatting
-        readable['ctyname'] = readable['ctyname'].str.replace(' County', '')
-        
-        readable[['County', 'State']] = readable['ctyname'].str.split(', ', expand = True)
-        
-        #renaming description to sector for readability
-        readable.rename({'DESCRIPTION': 'Sector'}, axis = 1, inplace = True)
-        
-        readable = readable.groupby('ctyname').apply(make_percent)
-        
-        return readable[['County', 'State', 'ctyname', 'Sector', 'NAICS', 'Employment', 'Percent']]
+    #replacing 'county' with an empty string for JSON formatting
+    readable['ctyname'] = readable['ctyname'].str.replace(' County', '')
+    
+    readable[['County', 'State']] = readable['ctyname'].str.split(', ', expand = True)
+    
+    #handling irregular names in Alaska
+    ak_mask = (readable['State'] == 'AK')
+    readable.loc[ak_mask, 'ctyname'] = readable[ak_mask]['ctyname'].apply(name_only)
+    
+    #renaming description to sector for readability
+    readable.rename({'DESCRIPTION': 'Sector'}, axis = 1, inplace = True)
+    
+    readable = readable.groupby('ctyname').apply(make_percent)
+    
+    return readable[['County', 'State', 'ctyname', 'Sector', 'NAICS', 'Employment', 'Percent']]
     
 '''
 Helper function to handle irregular names in Alaska's data.
