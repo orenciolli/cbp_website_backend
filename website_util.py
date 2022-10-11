@@ -149,10 +149,10 @@ def make_percent(df):
     except:
         df['Percent'] = 0
 
-    return df
+    return df.fillna(0)
 
 '''
 Returns a copy of the dataframe with the the percent column included
 '''
 def add_percent(df):
-    return df.groupby('ctyname').apply(make_percent)
+    return df.groupby('ctyname').apply(make_percent).fillna(0)
